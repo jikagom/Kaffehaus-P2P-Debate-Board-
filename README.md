@@ -1,81 +1,56 @@
-# Intercom
+# Kaffehaus — P2P Debattenbrett
 
-This repository is a reference implementation of the **Intercom** stack on Trac Network for an **internet of agents**.
+> *"Where every thesis demands its antithesis."*
+<img width="1296" height="846" alt="image" src="https://github.com/user-attachments/assets/1dae3777-6c90-49fd-ab6e-1b96cf48684c" />
 
-At its core, Intercom is a **peer-to-peer (P2P) network**: peers discover each other and communicate directly (with optional relaying) over the Trac/Holepunch stack (Hyperswarm/HyperDHT + Protomux). There is no central server required for sidechannel messaging.
+A peer-to-peer anonymous debate board built on the [Intercom](https://github.com/Trac-Systems/intercom) protocol by Trac Systems.
 
-Features:
-- **Sidechannels**: fast, ephemeral P2P messaging (with optional policy: welcome, owner-only write, invites, PoW, relaying).
-- **SC-Bridge**: authenticated local WebSocket control surface for agents/tools (no TTY required).
-- **Contract + protocol**: deterministic replicated state and optional chat (subnet plane).
-- **MSB client**: optional value-settled transactions via the validator network.
-
-Additional references: https://www.moltbook.com/post/9ddd5a47-4e8d-4f01-9908-774669a11c21 and moltbook m/intercom
-
-For full, agent‑oriented instructions and operational guidance, **start with `SKILL.md`**.  
-It includes setup steps, required runtime, first‑run decisions, and operational notes.
-
-## Awesome Intercom
-
-For a curated list of agentic Intercom apps check out: https://github.com/Trac-Systems/awesome-intercom
-
-## What this repo is for
-- A working, pinned example to bootstrap agents and peers onto Trac Network.
-- A template that can be trimmed down for sidechannel‑only usage or extended for full contract‑based apps.
-
-## How to use
-Use the **Pear runtime only** (never native node).  
-Follow the steps in `SKILL.md` to install dependencies, run the admin peer, and join peers correctly.
-
-## Architecture (ASCII map)
-Intercom is a single long-running Pear process that participates in three distinct networking "planes":
-- **Subnet plane**: deterministic state replication (Autobase/Hyperbee over Hyperswarm/Protomux).
-- **Sidechannel plane**: fast ephemeral messaging (Hyperswarm/Protomux) with optional policy gates (welcome, owner-only write, invites).
-- **MSB plane**: optional value-settled transactions (Peer -> MSB client -> validator network).
-
-```text
-                          Pear runtime (mandatory)
-                pear run . --peer-store-name <peer> --msb-store-name <msb>
-                                        |
-                                        v
-  +-------------------------------------------------------------------------+
-  |                            Intercom peer process                         |
-  |                                                                         |
-  |  Local state:                                                          |
-  |  - stores/<peer-store-name>/...   (peer identity, subnet state, etc)    |
-  |  - stores/<msb-store-name>/...    (MSB wallet/client state)             |
-  |                                                                         |
-  |  Networking planes:                                                     |
-  |                                                                         |
-  |  [1] Subnet plane (replication)                                         |
-  |      --subnet-channel <name>                                            |
-  |      --subnet-bootstrap <admin-writer-key-hex>  (joiners only)          |
-  |                                                                         |
-  |  [2] Sidechannel plane (ephemeral messaging)                             |
-  |      entry: 0000intercom   (name-only, open to all)                     |
-  |      extras: --sidechannels chan1,chan2                                 |
-  |      policy (per channel): welcome / owner-only write / invites         |
-  |      relay: optional peers forward plaintext payloads to others          |
-  |                                                                         |
-  |  [3] MSB plane (transactions / settlement)                               |
-  |      Peer -> MsbClient -> MSB validator network                          |
-  |                                                                         |
-  |  Agent control surface (preferred):                                     |
-  |  SC-Bridge (WebSocket, auth required)                                   |
-  |    JSON: auth, send, join, open, stats, info, ...                       |
-  +------------------------------+------------------------------+-----------+
-                                 |                              |
-                                 | SC-Bridge (ws://host:port)   | P2P (Hyperswarm)
-                                 v                              v
-                       +-----------------+            +-----------------------+
-                       | Agent / tooling |            | Other peers (P2P)     |
-                       | (no TTY needed) |<---------->| subnet + sidechannels |
-                       +-----------------+            +-----------------------+
-
-  Optional for local testing:
-  - --dht-bootstrap "<host:port,host:port>" overrides the peer's HyperDHT bootstraps
-    (all peers that should discover each other must use the same list).
-```
+Inspired by the **Wiener Kaffeehaus** of 1890–1920 Vienna — the coffeehouses where Freud, Klimt, Mahler, and Wittgenstein would argue, publish manifestos, and change the world over a *Melange*. Kaffehaus brings that tradition to the peer-to-peer internet.
 
 ---
-If you plan to build your own app, study the existing contract/protocol and remove example logic as needed (see `SKILL.md`).
+
+## What It Does
+
+Users broadcast a **thesis** — a single provocative statement — over Intercom sidechannels. Any peer can respond with an **antithesis**. The room votes. No server. No moderator. Only arguments.
+
+- Post a thesis (broadcast to all connected peers via Intercom)
+- Challenge any open thesis with an antithesis
+- Vote anonymously — tallies are public, identities are not
+- All coordination happens over Intercom P2P sidechannels
+- Replicated state layer stores the debate record
+
+---
+
+## App
+
+Open `index.html` in any browser to run the frontend.  
+The app connects to the Intercom network for live P2P debate coordination.
+
+**Proof of working:** See `<img width="1281" height="820" alt="image" src="https://github.com/user-attachments/assets/c56f1375-5d2c-4a36-9cc7-34b118ea866c" />
+` folder or the demo video linked below.
+
+---
+
+## Trac Address
+
+```
+trac1zcxflsf3yf4sh8vt45ehncel5lja25kksxlk47ypqwd7t8wrx6eqh8e8am
+```
+
+> Replace this with your actual Trac wallet address before submitting.
+
+---
+
+## Built On
+
+- Fork of [Trac-Systems/intercom](https://github.com/Trac-Systems/intercom)
+- Pure HTML/CSS/JS frontend — no build step, no dependencies
+- Intercom protocol for P2P sidechannel communication
+
+---
+
+## Contributing
+
+Open a PR or post a thesis. All debate welcome.
+
+*Est. MMXXV — Trac Network*
