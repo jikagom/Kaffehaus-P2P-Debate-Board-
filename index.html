@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaffehaus — P2P Debattenbrett</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --paper: #f4edd8;
+    --paper-dark: #e8ddc4;
+    --sepia: #8b6914;
+    --red: #8b1a1a;
+    --muted: #6b5a3e;
+    --border: #c4a96a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--paper-dark);
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    font-size: 17px;
+    line-height: 1.7;
+    min-height: 100vh;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* MASTHEAD */
+  header {
+    border-bottom: 3px double var(--border);
+    padding: 0;
+    text-align: center;
+    background: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .masthead-rule {
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--sepia) 0px, var(--sepia) 4px, transparent 4px, transparent 8px);
+  }
+
+  .masthead-inner {
+    padding: 32px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .issue-line {
+    font-family: 'EB Garamond', serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    max-width: 860px;
+    margin: 0 auto 16px;
+  }
+
+  h1 {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(52px, 8vw, 96px);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .subtitle {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+  }
+
+  .tagline {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 20px;
+  }
+
+  /* NAV BAR */
+  nav {
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    padding: 8px;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-family: 'EB Garamond', serif;
+  }
+
+  nav span { margin: 0 16px; opacity: 0.7; }
+  nav span.active { opacity: 1; border-bottom: 1px solid var(--border); cursor: pointer; }
+
+  /* LAYOUT */
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 40px;
+  }
+
+  /* MAIN COLUMN */
+  .section-head {
+    font-family: 'IM Fell English', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 24px;
+  }
+
+  /* DEBATE CARD */
+  .debate-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    margin-bottom: 28px;
+    position: relative;
+    box-shadow: 2px 3px 0 rgba(139,105,20,0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .debate-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 6px 0 rgba(139,105,20,0.2);
+  }
+
+  .card-header {
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid var(--paper-dark);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .card-number {
+    font-family: 'IM Fell English', serif;
+    font-size: 28px;
+    color: var(--border);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .card-meta {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .thesis-block {
+    padding: 18px 24px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .thesis-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-family: 'EB Garamond', serif;
+    margin-bottom: 6px;
+  }
+
+  .thesis-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  .antithesis-block {
+    padding: 14px 24px;
+    background: rgba(26,18,8,0.03);
+  }
+
+  .antithesis-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'EB Garamond', serif;
+    margin-bottom: 4px;
+  }
+
+  .antithesis-text {
+    font-size: 15px;
+    color: #3a2e1e;
+    font-style: italic;
+  }
+
+  .card-footer {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  .vote-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .vote-btn {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    padding: 3px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    letter-spacing: 0.05em;
+  }
+
+  .vote-btn:hover { background: var(--ink); color: var(--paper); }
+  .vote-btn.thesis-vote { color: var(--red); border-color: var(--red); }
+  .vote-btn.thesis-vote:hover { background: var(--red); color: var(--paper); }
+
+  .vote-count {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .peer-badge {
+    margin-left: auto;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0.7;
+  }
+
+  /* COMPOSE BOX */
+  .compose-box {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+    padding: 20px 24px;
+  }
+
+  .compose-box h3 {
+    font-family: 'IM Fell English', serif;
+    font-size: 18px;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+
+  .compose-box textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    font-family: 'EB Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--ink);
+    resize: none;
+    padding: 8px 0;
+    line-height: 1.6;
+    outline: none;
+  }
+
+  .compose-box textarea::placeholder {
+    color: var(--border);
+    font-style: italic;
+  }
+
+  .compose-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+  }
+
+  .compose-footer small {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .post-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 8px 22px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .post-btn:hover { background: var(--red); }
+
+  /* SIDEBAR */
+  aside { }
+
+  .sidebar-widget {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    padding: 18px 18px;
+  }
+
+  .sidebar-widget h4 {
+    font-family: 'IM Fell English', serif;
+    font-size: 15px;
+    border-bottom: 1px solid var(--paper-dark);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    letter-spacing: 0.03em;
+  }
+
+  .sidebar-widget p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .trac-address {
+    font-family: monospace;
+    font-size: 11px;
+    background: var(--paper-dark);
+    padding: 8px;
+    margin-top: 10px;
+    word-break: break-all;
+    color: var(--ink);
+    border-left: 3px solid var(--sepia);
+  }
+
+  .rules-list {
+    list-style: none;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .rules-list li {
+    padding: 5px 0;
+    border-bottom: 1px dashed rgba(196,169,106,0.4);
+    display: flex;
+    gap: 8px;
+  }
+
+  .rules-list li::before {
+    content: "§";
+    color: var(--red);
+    flex-shrink: 0;
+  }
+
+  .ornament {
+    text-align: center;
+    color: var(--border);
+    font-size: 20px;
+    margin: 8px 0;
+    letter-spacing: 0.3em;
+  }
+
+  .p2p-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4a7c4e;
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 28px 20px;
+    border-top: 3px double var(--border);
+    background: var(--paper);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  footer .ornament-footer {
+    font-family: 'IM Fell English', serif;
+    font-size: 22px;
+    color: var(--border);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* DIVIDER */
+  .col-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    font-size: 11px;
+    color: var(--border);
+    letter-spacing: 0.3em;
+  }
+
+  .col-divider::before, .col-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    opacity: 0.5;
+  }
+
+  /* Fade-in animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .debate-card {
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  .debate-card:nth-child(2) { animation-delay: 0.1s; }
+  .debate-card:nth-child(3) { animation-delay: 0.2s; }
+
+  @media (max-width: 700px) {
+    .container { grid-template-columns: 1fr; }
+    aside { display: none; }
+    .issue-line { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="masthead-rule"></div>
+  <div class="masthead-inner">
+    <div class="issue-line">
+      <span>Est. MMXXV &mdash; Trac Network</span>
+      <span>P2P Debattenbrett &mdash; Intercom Protocol</span>
+      <span>Vol. I &bull; No. 1</span>
+    </div>
+    <h1>Kaffehaus</h1>
+    <p class="subtitle">das Peer-to-Peer Streitgespräch</p>
+    <span class="tagline">Where Every Thesis Demands Its Antithesis</span>
+  </div>
+  <nav>
+    <span class="active">Debate Hall</span>
+    <span>Archive</span>
+    <span>Salon</span>
+    <span>About</span>
+  </nav>
+</header>
+
+<div class="container">
+  <main>
+    <p class="section-head">Open Debates · Transmitted via Intercom Sidechannels</p>
+
+    <!-- Compose -->
+    <div class="compose-box">
+      <h3>Propose a Thesis</h3>
+      <textarea rows="3" placeholder="State your proposition clearly and without reservation. A good thesis invites opposition…" id="thesisInput"></textarea>
+      <div class="compose-footer">
+        <small>Your words, once broadcast, cannot be recalled. Speak with conviction.</small>
+        <button class="post-btn" onclick="postThesis()">Post to the Hall</button>
+      </div>
+    </div>
+
+    <div class="col-divider">⁂ ⁂ ⁂</div>
+
+    <!-- Debate cards -->
+    <div id="debates-list">
+
+      <article class="debate-card">
+        <div class="card-header">
+          <span class="card-number">I.</span>
+          <div>
+            <div class="card-meta">Posted by anon_7f3a &bull; 3 minutes ago &bull; 4 peers online</div>
+          </div>
+        </div>
+        <div class="thesis-block">
+          <div class="thesis-label">Thesis</div>
+          <div class="thesis-text">"A network without memory is merely noise — true intelligence requires the capacity to forget selectively."</div>
+        </div>
+        <div class="antithesis-block">
+          <div class="antithesis-label">Antithesis · by anon_2c9e</div>
+          <div class="antithesis-text">"Selective forgetting is a euphemism for censorship dressed in epistemology's robes."</div>
+        </div>
+        <div class="card-footer">
+          <div class="vote-group">
+            <button class="vote-btn thesis-vote" onclick="vote(this, 'thesis-1')">For Thesis</button>
+            <span class="vote-count" id="thesis-1">17 voices</span>
+          </div>
+          <div class="vote-group">
+            <button class="vote-btn" onclick="vote(this, 'anti-1')">For Antithesis</button>
+            <span class="vote-count" id="anti-1">23 voices</span>
+          </div>
+          <span class="peer-badge">⇄ P2P · OPEN</span>
+        </div>
+      </article>
+
+      <article class="debate-card">
+        <div class="card-header">
+          <span class="card-number">II.</span>
+          <div>
+            <div class="card-meta">Posted by anon_44bd &bull; 19 minutes ago &bull; 7 peers online</div>
+          </div>
+        </div>
+        <div class="thesis-block">
+          <div class="thesis-label">Thesis</div>
+          <div class="thesis-text">"Decentralisation is not a political stance but a mathematical inevitability — all centralised systems tend toward their own corruption."</div>
+        </div>
+        <div class="antithesis-block">
+          <div class="antithesis-label">Antithesis · by anon_88f1</div>
+          <div class="antithesis-text">"Mathematics describes systems; it does not prescribe them. The Viennese postal system was central, and it ran with extraordinary precision for eighty years."</div>
+        </div>
+        <div class="card-footer">
+          <div class="vote-group">
+            <button class="vote-btn thesis-vote" onclick="vote(this, 'thesis-2')">For Thesis</button>
+            <span class="vote-count" id="thesis-2">41 voices</span>
+          </div>
+          <div class="vote-group">
+            <button class="vote-btn" onclick="vote(this, 'anti-2')">For Antithesis</button>
+            <span class="vote-count" id="anti-2">38 voices</span>
+          </div>
+          <span class="peer-badge">⇄ P2P · OPEN</span>
+        </div>
+      </article>
+
+      <article class="debate-card">
+        <div class="card-header">
+          <span class="card-number">III.</span>
+          <div>
+            <div class="card-meta">Posted by anon_c3d7 &bull; 1 hour ago &bull; 2 peers online</div>
+          </div>
+        </div>
+        <div class="thesis-block">
+          <div class="thesis-label">Thesis</div>
+          <div class="thesis-text">"Anonymous speech is the only honest speech — identity compels performance, not sincerity."</div>
+        </div>
+        <div class="antithesis-block">
+          <div class="antithesis-label">Antithesis · (awaiting response…)</div>
+          <div class="antithesis-text" style="opacity:0.45; font-size:14px;">No peer has yet submitted a counter. The thesis stands unchallenged.</div>
+        </div>
+        <div class="card-footer">
+          <div class="vote-group">
+            <button class="vote-btn thesis-vote" onclick="vote(this, 'thesis-3')">For Thesis</button>
+            <span class="vote-count" id="thesis-3">9 voices</span>
+          </div>
+          <div class="vote-group">
+            <button class="vote-btn" onclick="postAntithesis(3)">Counter with Antithesis</button>
+          </div>
+          <span class="peer-badge">⇄ P2P · AWAITING</span>
+        </div>
+      </article>
+
+    </div><!-- /debates-list -->
+  </main>
+
+  <aside>
+    <div class="sidebar-widget">
+      <h4>About Kaffehaus</h4>
+      <p>A peer-to-peer debate board built on the Intercom protocol. Every thesis is broadcast over encrypted sidechannels. No server. No moderator. Only arguments.</p>
+      <div class="p2p-status">
+        <div class="status-dot"></div>
+        <span>6 peers connected via Intercom</span>
+      </div>
+    </div>
+
+    <div class="sidebar-widget">
+      <h4>Trac Address</h4>
+      <p style="font-size:13px; margin-bottom:6px;">Contributions received at:</p>
+      <div class="trac-address">YOUR_TRAC_ADDRESS_HERE</div>
+      <p style="font-size:12px; margin-top:10px; color:var(--muted);">Replace with your actual Trac wallet address.</p>
+    </div>
+
+    <div class="sidebar-widget">
+      <h4>Rules of the Hall</h4>
+      <ul class="rules-list">
+        <li>One thesis per session, stated clearly</li>
+        <li>Antithesis must directly oppose the thesis</li>
+        <li>No appeals to authority — only argument</li>
+        <li>All debate is anonymous and P2P</li>
+        <li>Votes are tallied but never final</li>
+      </ul>
+    </div>
+
+    <div class="sidebar-widget">
+      <h4>Protocol</h4>
+      <p style="font-size:13px;">Built on <strong>Intercom</strong> by Trac Systems — fast P2P sidechannels for agent coordination and replicated state for shared decisions.</p>
+      <p style="font-size:12px; margin-top:8px;">
+        <a href="https://github.com/Trac-Systems/intercom" style="color: var(--sepia);">github.com/Trac-Systems/intercom</a>
+      </p>
+    </div>
+
+    <div class="ornament">✦ ✦ ✦</div>
+  </aside>
+</div>
+
+<footer>
+  <span class="ornament-footer">❧</span>
+  Kaffehaus &mdash; A fork of Intercom by Trac Systems &mdash; No servers were harmed in the making of this debate.
+  <br>
+  <small style="opacity:0.5; display:block; margin-top:6px; letter-spacing:0.2em; text-transform:uppercase;">Peer-to-Peer · Open Source · Est. MMXXV</small>
+</footer>
+
+<script>
+// Simple vote counter
+function vote(btn, id) {
+  const el = document.getElementById(id);
+  const current = parseInt(el.textContent);
+  el.textContent = (current + 1) + ' voices';
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+  btn.style.cursor = 'default';
+}
+
+// Post a new thesis
+function postThesis() {
+  const input = document.getElementById('thesisInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const list = document.getElementById('debates-list');
+  const num = list.querySelectorAll('.debate-card').length + 1;
+  const romans = ['I','II','III','IV','V','VI','VII','VIII','IX','X',
+                  'XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
+
+  const card = document.createElement('article');
+  card.className = 'debate-card';
+  card.style.animationDelay = '0s';
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="card-number">${romans[num-1] || num + '.'}</span>
+      <div>
+        <div class="card-meta">Posted by you &bull; Just now &bull; 1 peer online</div>
+      </div>
+    </div>
+    <div class="thesis-block">
+      <div class="thesis-label">Thesis</div>
+      <div class="thesis-text">"${text}"</div>
+    </div>
+    <div class="antithesis-block">
+      <div class="antithesis-label">Antithesis · (broadcasting to peers…)</div>
+      <div class="antithesis-text" style="opacity:0.4; font-size:14px;">Your thesis has been broadcast. Awaiting a challenger.</div>
+    </div>
+    <div class="card-footer">
+      <div class="vote-group">
+        <button class="vote-btn thesis-vote" onclick="vote(this, 'thesis-n${num}')">For Thesis</button>
+        <span class="vote-count" id="thesis-n${num}">0 voices</span>
+      </div>
+      <div class="vote-group">
+        <button class="vote-btn" onclick="vote(this, 'anti-n${num}')">For Antithesis</button>
+        <span class="vote-count" id="anti-n${num}">0 voices</span>
+      </div>
+      <span class="peer-badge">⇄ P2P · OPEN</span>
+    </div>
+  `;
+
+  list.insertBefore(card, list.firstChild);
+  input.value = '';
+}
+
+function postAntithesis(n) {
+  const text = prompt('State your antithesis:');
+  if (!text) return;
+  const card = document.querySelectorAll('.debate-card')[n - 1];
+  if (!card) return;
+  const block = card.querySelector('.antithesis-block');
+  block.querySelector('.antithesis-label').textContent = 'Antithesis · by you';
+  block.querySelector('.antithesis-text').style.opacity = '1';
+  block.querySelector('.antithesis-text').style.fontSize = '15px';
+  block.querySelector('.antithesis-text').textContent = text;
+  const badge = card.querySelector('.peer-badge');
+  badge.textContent = '⇄ P2P · OPEN';
+}
+</script>
+</body>
+</html>
